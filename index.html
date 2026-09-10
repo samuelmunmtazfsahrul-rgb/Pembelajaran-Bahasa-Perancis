@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Les Partitifs en Voyage - Jeu d'Association Grammaticale</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        esRed: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            500: '#e11d48',
+                            600: '#c8102e',
+                            700: '#9f0d23',
+                            800: '#7e0f1f',
+                            900: '#42060d',
+                        },
+                        esYellow: {
+                            100: '#fef9c3',
+                            300: '#fde047',
+                            400: '#facc15',
+                            500: '#f1bf00',
+                            600: '#d9a700',
+                            700: '#a17800',
+                        },
+                        esDark: '#1e0507'
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        display: ['Fredoka', 'cursive'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #1e0507;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(200, 16, 46, 0.28) 0%, transparent 45%),
+                radial-gradient(circle at 90% 80%, rgba(241, 191, 0, 0.22) 0%, transparent 45%);
+            background-attachment: fixed;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .gold-border {
+            border: 2px solid #f1bf00;
+        }
+
+        .gold-gradient-text {
+            background: linear-gradient(135deg, #FFF 0%, #FACC15 50%, #F1BF00 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .spanish-gradient {
+            background: linear-gradient(135deg, #c8102e 0%, #9f0d23 50%, #7e0f1f 100%);
+        }
+
+        .yellow-gradient {
+            background: linear-gradient(135deg, #f1bf00 0%, #facc15 100%);
+        }
+
+        .card-draggable {
+            touch-action: none;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card-draggable:hover {
+            transform: translateY(-2px);
+        }
+
+        .card-draggable.selected {
+            border-color: #f1bf00;
+            background-color: #fef9c3;
+            color: #7e0f1f;
+            transform: scale(1.03);
+            box-shadow: 0 10px 25px -5px rgba(241, 191, 0, 0.5);
+        }
+
+        .drop-zone {
+            transition: all 0.25s ease;
+        }
+
+        .drop-zone.drag-over {
+            background-color: rgba(241, 191, 0, 0.18);
+            border-color: #f1bf00;
+            transform: scale(1.02);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e0507;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c8102e;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #f1bf00;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen text-slate-100 flex flex-col justify-between overflow-x-hidden antialiased">
+
+    <!-- Header Navigation Bar -->
+    <header class="w-full bg-esDark/90 backdrop-blur-md border-b-2 border-esYellow-500/30 sticky top-0 z-40 px-4 py-3">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            
+            <!-- Branding Logo & Title -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl spanish-gradient flex items-center justify-center shadow-lg border border-esYellow-500/50">
+                    <i class="fa-solid fa-plane-departure text-esYellow-400 text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-display font-bold text-xl leading-tight gold-gradient-text tracking-wide">
+                        Partitifs & Voyage
+                    </h1>
+                    <p class="text-xs text-esYellow-300/80 hidden sm:block">Atelier de Grammaire : Les Voyages et les Souvenirs</p>
+                </div>
+            </div>
+
+            <!-- Header Action Controls -->
+            <div class="flex items-center gap-2 sm:gap-4">
+                <button onclick="toggleGrammarModal()" class="px-3 py-1.5 rounded-lg bg-esRed-900/70 hover:bg-esRed-800 border border-esYellow-500/40 text-esYellow-300 text-xs sm:text-sm font-semibold transition flex items-center gap-2">
+                    <i class="fa-solid fa-book-open text-esYellow-400"></i>
+                    <span class="hidden md:inline">Règles de Grammaire</span>
+                    <span class="md:hidden">Règles</span>
+                </button>
+
+                <div class="bg-esRed-950/80 px-3 py-1.5 rounded-lg border border-esYellow-500/30 flex items-center gap-2">
+                    <i class="fa-solid fa-trophy text-esYellow-400 text-sm"></i>
+                    <span class="text-xs text-gray-300 hidden sm:inline">Score :</span>
+                    <span id="currentScoreText" class="font-bold text-esYellow-400 text-sm">0 / 0</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl w-full mx-auto p-4 sm:p-6 flex-grow flex flex-col justify-center">
+
+        <!-- Banner Consigne et Niveaux -->
+        <div class="bg-gradient-to-r from-esRed-900/80 via-esRed-800/90 to-esRed-900/80 border-2 border-esYellow-500/60 rounded-2xl p-4 sm:p-6 mb-6 shadow-2xl relative overflow-hidden">
+            <div class="absolute -right-6 -bottom-6 text-esYellow-500/10 text-9xl pointer-events-none select-none">
+                <i class="fa-solid fa-earth-americas"></i>
+            </div>
+            
+            <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-esYellow-500/20 border border-esYellow-400/40 text-esYellow-300 text-xs font-bold uppercase tracking-wider mb-2">
+                        <i class="fa-solid fa-compass"></i> Consigne de l'exercice
+                    </div>
+                    <h2 class="text-lg sm:text-2xl font-bold text-white mb-1" id="levelTitle">
+                        Chargement du niveau...
+                    </h2>
+                    <p class="text-sm text-esYellow-100/90" id="levelInstruction">
+                        Associez chaque élément de voyage à l'article partitif qui convient.
+                    </p>
+                </div>
+
+                <!-- Tabs de Sélection de Niveau -->
+                <div class="flex items-center gap-1.5 bg-esDark/70 p-1.5 rounded-xl border border-esYellow-500/30 self-start md:self-auto">
+                    <button id="btnNavLevel1" onclick="switchLevel(1)" class="px-3 py-1.5 rounded-lg text-xs font-bold transition">
+                        Niveau 1
+                    </button>
+                    <button id="btnNavLevel2" onclick="switchLevel(2)" class="px-3 py-1.5 rounded-lg text-xs font-bold transition">
+                        Niveau 2
+                    </button>
+                    <button id="btnNavLevel3" onclick="switchLevel(3)" class="px-3 py-1.5 rounded-lg text-xs font-bold transition">
+                        Niveau 3
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            <!-- Colonne Éléments Source (Gauche) -->
+            <div class="lg:col-span-5 bg-esDark/85 border-2 border-esYellow-500/30 rounded-2xl p-4 sm:p-5 shadow-xl backdrop-blur-sm">
+                <div class="flex items-center justify-between pb-3 mb-4 border-b border-esYellow-500/20">
+                    <h3 class="font-display font-bold text-base text-esYellow-400 flex items-center gap-2">
+                        <i class="fa-solid fa-suitcase"></i> Élément(s) à placer
+                    </h3>
+                    <span id="remainingItemsBadge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-esRed-700 text-white border border-esYellow-400/30">
+                        0 restant(s)
+                    </span>
+                </div>
+
+                <!-- Astuce tactile / mobile -->
+                <p class="text-xs text-gray-400 mb-3 italic">
+                    <i class="fa-solid fa-hand-pointer text-esYellow-400"></i> Cliquez sur un élément puis sur la zone cible correspondante, ou glissez-déposez la carte.
+                </p>
+
+                <!-- Cartes Déplaçables Container -->
+                <div id="sourceCardsContainer" class="flex flex-col gap-3 min-h-[280px]">
+                    <!-- Injected dynamically -->
+                </div>
+            </div>
+
+            <!-- Colonne Zones Cibles / Articles (Droite) -->
+            <div class="lg:col-span-7 bg-esDark/85 border-2 border-esYellow-500/30 rounded-2xl p-4 sm:p-5 shadow-xl backdrop-blur-sm">
+                <div class="flex items-center justify-between pb-3 mb-4 border-b border-esYellow-500/20">
+                    <h3 class="font-display font-bold text-base text-esYellow-400 flex items-center gap-2">
+                        <i class="fa-solid fa-map-pin"></i> Articles Partitifs (Cibles)
+                    </h3>
+                    <button onclick="resetCurrentLevel()" class="text-xs text-esYellow-300 hover:text-white transition underline flex items-center gap-1">
+                        <i class="fa-solid fa-rotate-right"></i> Réinitialiser
+                    </button>
+                </div>
+
+                <!-- Zones Cibles Container -->
+                <div id="dropZonesContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <!-- Injected dynamically -->
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Barre d'Action et de Validation -->
+        <div class="mt-6 flex flex-wrap items-center justify-between gap-4 bg-esDark/90 border border-esYellow-500/30 p-4 rounded-2xl shadow-lg">
+            <div id="feedbackText" class="text-sm font-medium text-esYellow-200 flex items-center gap-2">
+                <i class="fa-solid fa-circle-info text-esYellow-400"></i> Glissez ou associez tous les éléments pour valider votre réponse.
+            </div>
+
+            <div class="flex items-center gap-3 ml-auto">
+                <button id="btnValidate" onclick="validateAnswers()" disabled class="px-6 py-2.5 rounded-xl spanish-gradient font-bold text-white text-sm shadow-lg hover:brightness-110 active:scale-95 disabled:opacity-40 disabled:pointer-events-none transition border border-esYellow-400/40 flex items-center gap-2">
+                    <i class="fa-solid fa-check-circle"></i> Valider mes réponses
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer Copyright -->
+    <footer class="w-full bg-esDark border-t border-esYellow-500/20 py-3 text-center text-xs text-esYellow-200/60">
+        <p>Support Pédagogique FLE - Évaluation des Articles Partitifs (*du, de la, de l', des, de/d'*)</p>
+    </footer>
+
+    <!-- Modal : Rappel de Grammaire -->
+    <div id="grammarModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="bg-esDark border-2 border-esYellow-500 rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-fade-in">
+            
+            <!-- Modal Header -->
+            <div class="spanish-gradient p-4 border-b border-esYellow-500/40 flex items-center justify-between">
+                <div class="flex items-center gap-2 text-white">
+                    <i class="fa-solid fa-book-bookmark text-esYellow-400 text-xl"></i>
+                    <h3 class="font-display font-bold text-lg">Grammaire : Les Articles Partitifs</h3>
+                </div>
+                <button onclick="toggleGrammarModal()" class="text-esYellow-300 hover:text-white text-xl font-bold px-2">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content -->
+            <div class="p-6 overflow-y-auto space-y-4 text-sm text-slate-200">
+                <p class="text-xs text-esYellow-300 font-semibold uppercase tracking-wider">
+                    L'article partitif exprime une quantité indéfinie ou une partie d'un tout (nourriture, notions, choses non comptables en voyage).
+                </p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    
+                    <div class="bg-esRed-950/60 border border-esYellow-500/30 p-3 rounded-xl">
+                        <div class="font-bold text-esYellow-400 mb-1 flex items-center gap-2">
+                            <span class="px-2 py-0.5 bg-esRed-700 text-white rounded text-xs font-mono">DU</span> Masculin singulier
+                        </div>
+                        <p class="text-xs text-gray-300">Devant une consonne.</p>
+                        <p class="text-xs text-esYellow-200 italic mt-1">Exemple : Je veux <b>du</b> soleil, <b>du</b> courage.</p>
+                    </div>
+
+                    <div class="bg-esRed-950/60 border border-esYellow-500/30 p-3 rounded-xl">
+                        <div class="font-bold text-esYellow-400 mb-1 flex items-center gap-2">
+                            <span class="px-2 py-0.5 bg-esRed-700 text-white rounded text-xs font-mono">DE LA</span> Féminin singulier
+                        </div>
+                        <p class="text-xs text-gray-300">Devant une consonne.</p>
+                        <p class="text-xs text-esYellow-200 italic mt-1">Exemple : Elle a <b>de la</b> monnaie locale.</p>
+                    </div>
+
+                    <div class="bg-esRed-950/60 border border-esYellow-500/30 p-3 rounded-xl">
+                        <div class="font-bold text-esYellow-400 mb-1 flex items-center gap-2">
+                            <span class="px-2 py-0.5 bg-esRed-700 text-white rounded text-xs font-mono">DE L'</span> Voyelle / H muet
+                        </div>
+                        <p class="text-xs text-gray-300">Nom singulier (masculin ou féminin).</p>
+                        <p class="text-xs text-esYellow-200 italic mt-1">Exemple : Nous achetons <b>de l'</b>artisanat, <b>de l'</b>eau.</p>
+                    </div>
+
+                    <div class="bg-esRed-950/60 border border-esYellow-500/30 p-3 rounded-xl">
+                        <div class="font-bold text-esYellow-400 mb-1 flex items-center gap-2">
+                            <span class="px-2 py-0.5 bg-esRed-700 text-white rounded text-xs font-mono">DES</span> Pluriel
+                        </div>
+                        <p class="text-xs text-gray-300">Noms au pluriel.</p>
+                        <p class="text-xs text-esYellow-200 italic mt-1">Exemple : Je me rappelle <b>des</b> souvenirs, <b>des</b> cartes.</p>
+                    </div>
+
+                </div>
+
+                <div class="bg-esYellow-500/10 border border-esYellow-500/50 p-3 rounded-xl mt-4">
+                    <h4 class="font-bold text-esYellow-400 text-xs uppercase flex items-center gap-1.5 mb-1">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Règle Spéciale : La Négation (Pas de / d')
+                    </h4>
+                    <p class="text-xs text-slate-200">
+                        À la forme négative (*ne ... pas*), l'article partitif devient obligatoirement <b>DE</b> (ou <b>D'</b> devant une voyelle / h) !
+                    </p>
+                    <p class="text-xs text-esYellow-300 italic mt-1">
+                        Exemple : Je n'ai pas <b>de</b> valise. / Il n'y a pas <b>d'</b>avion.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-4 bg-esDark border-t border-esYellow-500/20 text-right">
+                <button onclick="toggleGrammarModal()" class="px-5 py-2 rounded-xl yellow-gradient text-esDark font-bold text-xs hover:brightness-110 transition">
+                    J'ai compris !
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal : Résultats et Évaluation -->
+    <div id="resultModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="bg-esDark border-2 border-esYellow-500 rounded-2xl max-w-xl w-full p-6 text-center shadow-2xl relative overflow-hidden">
+            
+            <div id="resultIcon" class="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center text-4xl shadow-xl border-2 border-esYellow-400">
+                <!-- Dynamic Icon -->
+            </div>
+
+            <h3 id="resultTitle" class="font-display text-2xl font-bold text-white mb-1">
+                Résultat de l'Évaluation
+            </h3>
+            <p id="resultSubtitle" class="text-sm text-esYellow-300 mb-6">
+                Voici le bilan de votre performance grammaticale.
+            </p>
+
+            <!-- Score Display -->
+            <div class="bg-esRed-950/80 border border-esYellow-500/40 p-4 rounded-xl mb-6 flex items-center justify-around">
+                <div>
+                    <span class="block text-xs text-gray-400">Score obtenu</span>
+                    <span id="finalScoreVal" class="text-3xl font-bold gold-gradient-text">0/0</span>
+                </div>
+                <div class="h-10 w-px bg-esYellow-500/30"></div>
+                <div>
+                    <span class="block text-xs text-gray-400">Précision</span>
+                    <span id="finalPercentVal" class="text-3xl font-bold text-white">0%</span>
+                </div>
+            </div>
+
+            <!-- Correction Details List -->
+            <div class="text-left mb-6">
+                <h4 class="text-xs font-bold text-esYellow-400 uppercase tracking-wider mb-2">Détails des réponses :</h4>
+                <div id="correctionList" class="max-h-48 overflow-y-auto space-y-2 text-xs pr-1">
+                    <!-- Dynamic Correction Items -->
+                </div>
+            </div>
+
+            <!-- Modal Action Buttons -->
+            <div class="flex items-center justify-center gap-3">
+                <button onclick="closeResultModal(); resetCurrentLevel();" class="px-4 py-2.5 rounded-xl border border-esYellow-500/50 text-esYellow-300 font-semibold text-xs hover:bg-esRed-900 transition flex items-center gap-2">
+                    <i class="fa-solid fa-rotate-left"></i> Réessayer ce niveau
+                </button>
+                <button id="btnNextLevelModal" onclick="closeResultModal(); goToNextLevel();" class="px-5 py-2.5 rounded-xl yellow-gradient text-esDark font-bold text-xs hover:brightness-110 transition flex items-center gap-2">
+                    <span>Niveau suivant</span> <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        /* Web Audio API Synthesizer */
+        const AudioEngine = {
+            ctx: null,
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            },
+            playSuccess() {
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.15); // E5
+                osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.3); // G5
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            },
+            playError() {
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now); // A3
+                osc.frequency.exponentialRampToValueAtTime(146.83, now + 0.25); // D3
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            },
+            playSelect() {
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(440, now);
+                gain.gain.setValueAtTime(0.08, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.08);
+            }
+        };
+
+        /* Data Store: Levels and Items for "Les Voyages et les Souvenirs" */
+        const LEVELS_DATA = {
+            1: {
+                title: "Niveau 1 : Les Souvenirs et les Éléments du Voyage",
+                instruction: "Associez chaque nom relatif aux voyages au bon article partitif (*du, de la, de l', des*).",
+                targets: [
+                    { id: "du", label: "DU", subtitle: "Masculin singulier" },
+                    { id: "de la", label: "DE LA", subtitle: "Féminin singulier" },
+                    { id: "de l'", label: "DE L'", subtitle: "Devant voyelle / h" },
+                    { id: "des", label: "DES", subtitle: "Pluriel" }
+                ],
+                items: [
+                    { id: "i1", text: "soleil (m)", category: "du", icon: "fa-sun" },
+                    { id: "i2", text: "courage (m)", category: "du", icon: "fa-compass" },
+                    { id: "i3", text: "monnaie (f)", category: "de la", icon: "fa-coins" },
+                    { id: "i4", text: "patience (f)", category: "de la", icon: "fa-hourglass-half" },
+                    { id: "i5", text: "artisanat (m)", category: "de l'", icon: "fa-palette" },
+                    { id: "i6", text: "argent (m)", category: "de l'", icon: "fa-wallet" },
+                    { id: "i7", text: "souvenirs (m.pl)", category: "des", icon: "fa-gift" },
+                    { id: "i8", text: "cartes postales (f.pl)", category: "des", icon: "fa-map-location-dot" }
+                ]
+            },
+            2: {
+                title: "Niveau 2 : En route ! (Phrases de voyage)",
+                instruction: "Associez chaque phrase de séjour à l'article partitif manquant.",
+                targets: [
+                    { id: "du", label: "DU", subtitle: "Ex: du temps" },
+                    { id: "de la", label: "DE LA", subtitle: "Ex: de la musique" },
+                    { id: "de l'", label: "DE L'", subtitle: "Ex: de l'eau" },
+                    { id: "des", label: "DES", subtitle: "Ex: des valises" }
+                ],
+                items: [
+                    { id: "i201", text: "Pendant le trajet, nous avons pris ___ temps.", category: "du", icon: "fa-clock" },
+                    { id: "i202", text: "Au marché local, j'écoute ___ musique typique.", category: "de la", icon: "fa-music" },
+                    { id: "i203", text: "À la douane, il faut avoir ___ attention.", category: "de l'", icon: "fa-passport" },
+                    { id: "i204", text: "Dans mon sac, je mets ___ vêtements légers.", category: "des", icon: "fa-shirt" },
+                    { id: "i205", text: "Au restaurant, le serveur apporte ___ fromage.", category: "du", icon: "fa-cheese" },
+                    { id: "i206", text: "Sur la plage, nous buvons ___ limonade.", category: "de la", icon: "fa-glass-water" },
+                    { id: "i207", text: "Pendant la visite, il achète ___ huile d'olive.", category: "de l'", icon: "fa-bottle-droplet" },
+                    { id: "i208", text: "Pour mes amis, je ramène ___ magnets de frigo.", category: "des", icon: "fa-magnet" }
+                ]
+            },
+            3: {
+                title: "Niveau 3 : Pièges & Négations en Voyage",
+                instruction: "Attention à la forme négative (*ne... pas de / d'*) et aux articles partitifs ordinaires.",
+                targets: [
+                    { id: "du", label: "DU", subtitle: "Affirmatif masculin" },
+                    { id: "de la", label: "DE LA", subtitle: "Affirmatif féminin" },
+                    { id: "des", label: "DES", subtitle: "Affirmatif pluriel" },
+                    { id: "de", label: "DE", subtitle: "Négation (cons.)" },
+                    { id: "d'", label: "D'", subtitle: "Négation (voyelle)" }
+                ],
+                items: [
+                    { id: "i301", text: "Je n'ai pas acheté ___ souvenirs au musée.", category: "de", icon: "fa-ban" },
+                    { id: "i302", text: "Il n'y a plus ___ eau dans ma gourde.", category: "d'", icon: "fa-bottle-water" },
+                    { id: "i303", text: "Elle ne prend pas ___ photos pendant le vol.", category: "de", icon: "fa-camera" },
+                    { id: "i304", text: "Nous n'avons pas eu ___ chance avec la météo.", category: "de", icon: "fa-cloud-rain" },
+                    { id: "i305", text: "Il commande ___ café au bistrot espagnol.", category: "du", icon: "fa-mug-hot" },
+                    { id: "i306", text: "Je désire ___ paella pour le dîner.", category: "de la", icon: "fa-utensils" },
+                    { id: "i307", text: "Nous achetons ___ épices artisanales.", category: "des", icon: "fa-pepper-hot" },
+                    { id: "i308", text: "Tu ne portes pas ___ argent liquide sur toi.", category: "d'", icon: "fa-wallet" }
+                ]
+            }
+        };
+
+        // State variables
+        let currentLevelKey = 1;
+        let selectedSourceId = null;
+        let userAssignments = {}; // { itemID: targetID }
+        let totalScore = 0;
+
+        // Initialize App
+        window.onload = function() {
+            switchLevel(1);
+        };
+
+        function switchLevel(levelNum) {
+            currentLevelKey = levelNum;
+            selectedSourceId = null;
+            userAssignments = {};
+
+            // Update level navigation buttons UI
+            [1, 2, 3].forEach(num => {
+                const btn = document.getElementById(`btnNavLevel${num}`);
+                if (num === levelNum) {
+                    btn.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition yellow-gradient text-esDark shadow-md";
+                } else {
+                    btn.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition text-esYellow-300 hover:bg-esRed-900/60";
+                }
+            });
+
+            renderLevel();
+        }
+
+        function renderLevel() {
+            const data = LEVELS_DATA[currentLevelKey];
+
+            // Render Titles & Instructions
+            document.getElementById('levelTitle').innerText = data.title;
+            document.getElementById('levelInstruction').innerText = data.instruction;
+
+            // Render Target Categories (Drop Zones)
+            const dropZonesContainer = document.getElementById('dropZonesContainer');
+            dropZonesContainer.innerHTML = '';
+
+            data.targets.forEach(target => {
+                const zoneDiv = document.createElement('div');
+                zoneDiv.className = "drop-zone bg-esRed-950/60 border-2 border-dashed border-esYellow-500/40 rounded-xl p-3 min-h-[120px] flex flex-col justify-start transition hover:border-esYellow-400";
+                zoneDiv.dataset.targetId = target.id;
+
+                // Event Listeners for Drag & Drop and Click Selection
+                zoneDiv.addEventListener('dragover', handleDragOver);
+                zoneDiv.addEventListener('dragleave', handleDragLeave);
+                zoneDiv.addEventListener('drop', handleDrop);
+                zoneDiv.addEventListener('click', () => handleTargetZoneClick(target.id));
+
+                zoneDiv.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-esYellow-500/30 pb-1.5 mb-2 pointer-events-none">
+                        <span class="font-display font-bold text-esYellow-400 text-sm tracking-wide uppercase">${target.label}</span>
+                        <span class="text-[10px] text-esYellow-200/70 italic">${target.subtitle}</span>
+                    </div>
+                    <div class="assigned-items-container flex flex-wrap gap-2 flex-grow min-h-[50px] items-start pointer-events-none">
+                        <!-- Assigned cards rendered here -->
+                    </div>
+                `;
+
+                dropZonesContainer.appendChild(zoneDiv);
+            });
+
+            renderCards();
+            updateUIState();
+        }
+
+        function renderCards() {
+            const data = LEVELS_DATA[currentLevelKey];
+            const sourceCardsContainer = document.getElementById('sourceCardsContainer');
+            sourceCardsContainer.innerHTML = '';
+
+            // Clear drop zone containers
+            document.querySelectorAll('.assigned-items-container').forEach(c => c.innerHTML = '');
+
+            data.items.forEach(item => {
+                const targetId = userAssignments[item.id];
+
+                // Card Element
+                const card = document.createElement('div');
+                card.id = `card-${item.id}`;
+                card.draggable = true;
+                card.addEventListener('dragstart', handleDragStart);
+                card.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    handleCardClick(item.id);
+                });
+
+                if (targetId) {
+                    // Card is assigned to a target zone
+                    card.className = "card-draggable px-3 py-2 rounded-lg bg-esRed-900 border border-esYellow-500/60 text-white text-xs font-semibold shadow flex items-center justify-between cursor-pointer group hover:bg-esRed-800";
+                    card.innerHTML = `
+                        <span class="flex items-center gap-2">
+                            <i class="fa-solid ${item.icon} text-esYellow-400"></i>
+                            <span>${item.text}</span>
+                        </span>
+                        <button onclick="unassignItem(event, '${item.id}')" class="text-esYellow-400 hover:text-white ml-2 p-1">
+                            <i class="fa-solid fa-xmark text-xs"></i>
+                        </button>
+                    `;
+
+                    // Find and append to drop zone container
+                    const targetZone = document.querySelector(`.drop-zone[data-target-id="${targetId}"] .assigned-items-container`);
+                    if (targetZone) {
+                        targetZone.appendChild(card);
+                    }
+                } else {
+                    // Card is in source list
+                    const isSelected = (selectedSourceId === item.id);
+                    card.className = `card-draggable p-3 rounded-xl border-2 transition cursor-pointer flex items-center gap-3 text-sm font-semibold shadow-md ${
+                        isSelected 
+                        ? 'selected bg-esYellow-100 border-esYellow-400 text-esRed-900' 
+                        : 'bg-esRed-900/60 border-esYellow-500/30 text-slate-100 hover:border-esYellow-400 hover:bg-esRed-900/90'
+                    }`;
+
+                    card.innerHTML = `
+                        <div class="w-8 h-8 rounded-lg bg-esRed-950 flex items-center justify-center text-esYellow-400 border border-esYellow-500/30">
+                            <i class="fa-solid ${item.icon}"></i>
+                        </div>
+                        <span class="flex-grow">${item.text}</span>
+                        <i class="fa-solid fa-grip-vertical text-esYellow-500/40 text-xs"></i>
+                    `;
+
+                    sourceCardsContainer.appendChild(card);
+                }
+            });
+
+            // If source container is empty, show feedback
+            const unassignedCount = data.items.filter(i => !userAssignments[i.id]).length;
+            if (unassignedCount === 0) {
+                sourceCardsContainer.innerHTML = `
+                    <div class="h-full min-h-[180px] flex flex-col items-center justify-center text-center text-esYellow-300/60 border-2 border-dashed border-esYellow-500/20 rounded-xl p-4">
+                        <i class="fa-solid fa-circle-check text-3xl mb-2 text-esYellow-400"></i>
+                        <p class="text-xs">Tous les éléments ont été associés !<br>Vous pouvez valider vos réponses.</p>
+                    </div>
+                `;
+            }
+        }
+
+        /* Drag & Drop Handlers */
+        function handleDragStart(e) {
+            AudioEngine.playSelect();
+            const cardId = e.currentTarget.id.replace('card-', '');
+            e.dataTransfer.setData('text/plain', cardId);
+            selectedSourceId = cardId;
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const zone = e.currentTarget;
+            zone.classList.remove('drag-over');
+            const itemId = e.dataTransfer.getData('text/plain') || selectedSourceId;
+            const targetId = zone.dataset.targetId;
+
+            if (itemId && targetId) {
+                assignItem(itemId, targetId);
+            }
+        }
+
+        /* Click Selection Handlers */
+        function handleCardClick(itemId) {
+            AudioEngine.playSelect();
+            if (userAssignments[itemId]) {
+                // Unassign if clicked inside zone
+                delete userAssignments[itemId];
+                selectedSourceId = itemId;
+            } else {
+                // Toggle selection
+                selectedSourceId = (selectedSourceId === itemId) ? null : itemId;
+            }
+            renderCards();
+            updateUIState();
+        }
+
+        function handleTargetZoneClick(targetId) {
+            if (selectedSourceId) {
+                assignItem(selectedSourceId, targetId);
+            }
+        }
+
+        function assignItem(itemId, targetId) {
+            AudioEngine.playSelect();
+            userAssignments[itemId] = targetId;
+            selectedSourceId = null;
+            renderCards();
+            updateUIState();
+        }
+
+        function unassignItem(event, itemId) {
+            event.stopPropagation();
+            AudioEngine.playSelect();
+            delete userAssignments[itemId];
+            renderCards();
+            updateUIState();
+        }
+
+        function updateUIState() {
+            const data = LEVELS_DATA[currentLevelKey];
+            const totalCount = data.items.length;
+            const assignedCount = Object.keys(userAssignments).length;
+            const remainingCount = totalCount - assignedCount;
+
+            document.getElementById('remainingItemsBadge').innerText = `${remainingCount} restant(s)`;
+            
+            const btnValidate = document.getElementById('btnValidate');
+            const feedbackText = document.getElementById('feedbackText');
+
+            if (remainingCount === 0) {
+                btnValidate.disabled = false;
+                feedbackText.innerHTML = `<i class="fa-solid fa-circle-check text-green-400"></i> <span class="text-white font-bold">Prêt !</span> Cliquez sur "Valider mes réponses".`;
+            } else {
+                btnValidate.disabled = true;
+                feedbackText.innerHTML = `<i class="fa-solid fa-circle-info text-esYellow-400"></i> Placez encore <b>${remainingCount}</b> élément(s) pour pouvoir valider.`;
+            }
+
+            document.getElementById('currentScoreText').innerText = `${totalScore} pt(s)`;
+        }
+
+        function resetCurrentLevel() {
+            AudioEngine.playSelect();
+            userAssignments = {};
+            selectedSourceId = null;
+            renderCards();
+            updateUIState();
+        }
+
+        function validateAnswers() {
+            const data = LEVELS_DATA[currentLevelKey];
+            let correctCount = 0;
+            const correctionList = document.getElementById('correctionList');
+            correctionList.innerHTML = '';
+
+            data.items.forEach(item => {
+                const userChoice = userAssignments[item.id];
+                const isCorrect = (userChoice === item.category);
+
+                if (isCorrect) correctCount++;
+
+                const targetLabel = data.targets.find(t => t.id === item.category)?.label || item.category;
+                const userLabel = data.targets.find(t => t.id === userChoice)?.label || userChoice;
+
+                const row = document.createElement('div');
+                row.className = `p-2.5 rounded-lg border flex items-center justify-between text-xs ${
+                    isCorrect 
+                    ? 'bg-emerald-950/50 border-emerald-500/40 text-emerald-200' 
+                    : 'bg-esRed-950/70 border-esRed-500/50 text-esYellow-200'
+                }`;
+
+                row.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid ${isCorrect ? 'fa-check text-emerald-400' : 'fa-xmark text-esRed-400'} text-sm"></i>
+                        <span>${item.text}</span>
+                    </div>
+                    <div class="font-mono text-[11px]">
+                        ${isCorrect 
+                            ? `<span class="px-2 py-0.5 rounded bg-emerald-800/60 text-white font-bold">${targetLabel}</span>` 
+                            : `<span class="line-through text-gray-400 mr-1">${userLabel}</span><span class="px-2 py-0.5 rounded bg-esRed-700 text-white font-bold">${targetLabel}</span>`
+                        }
+                    </div>
+                `;
+                correctionList.appendChild(row);
+            });
+
+            const percentage = Math.round((correctCount / data.items.length) * 100);
+            totalScore += correctCount;
+
+            // Modal Display Updates
+            document.getElementById('finalScoreVal').innerText = `${correctCount} / ${data.items.length}`;
+            document.getElementById('finalPercentVal').innerText = `${percentage}%`;
+
+            const resultIcon = document.getElementById('resultIcon');
+            const resultTitle = document.getElementById('resultTitle');
+            const resultSubtitle = document.getElementById('resultSubtitle');
+
+            if (percentage >= 80) {
+                AudioEngine.playSuccess();
+                resultIcon.className = "w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center text-4xl shadow-xl border-2 border-emerald-400 bg-emerald-900/80 text-emerald-300";
+                resultIcon.innerHTML = `<i class="fa-solid fa-trophy"></i>`;
+                resultTitle.innerText = "Félicitations ! Excellent travail !";
+                resultSubtitle.innerText = "Vous maîtrisez parfaitement les articles partitifs pour les voyages.";
+            } else {
+                AudioEngine.playError();
+                resultIcon.className = "w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center text-4xl shadow-xl border-2 border-esYellow-400 bg-esRed-900/90 text-esYellow-400";
+                resultIcon.innerHTML = `<i class="fa-solid fa-plane-circle-exclamation"></i>`;
+                resultTitle.innerText = "Encore un effort !";
+                resultSubtitle.innerText = "Révisez les règles de grammaire et réessayez pour améliorer votre score.";
+            }
+
+            // Hide/Show next level button
+            const btnNextLevelModal = document.getElementById('btnNextLevelModal');
+            if (currentLevelKey < 3) {
+                btnNextLevelModal.classList.remove('hidden');
+            } else {
+                btnNextLevelModal.classList.add('hidden');
+            }
+
+            document.getElementById('resultModal').classList.remove('hidden');
+        }
+
+        function closeResultModal() {
+            document.getElementById('resultModal').classList.add('hidden');
+        }
+
+        function goToNextLevel() {
+            if (currentLevelKey < 3) {
+                switchLevel(currentLevelKey + 1);
+            }
+        }
+
+        function toggleGrammarModal() {
+            AudioEngine.playSelect();
+            const modal = document.getElementById('grammarModal');
+            modal.classList.toggle('hidden');
+        }
+    </script>
+</body>
+</html>
